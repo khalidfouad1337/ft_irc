@@ -1,81 +1,5 @@
 #include "server.hpp"
 
-bool Server::Signal = false; //-> initialize the static boolean
-void Server::SignalHandler(int signum)
-{
-	(void)signum;
-	std::cout << std::endl << "Signal Received!" << std::endl;
-	Server::Signal = true; //-> set the static boolean to true to stop the server
-}
-
-void	Server::CloseFds(){
-	for(size_t i = 0; i < clients.size(); i++){ //-> close all the clients
-		std::cout << RED << "Client <" << clients[i].GetFd() << "> Disconnected" << WHI << std::endl;
-		close(clients[i].GetFd());
-	}
-	if (SerSocketFd != -1){ //-> close the server socket
-		std::cout << RED << "Server <" << SerSocketFd << "> Disconnected" << WHI << std::endl;
-		close(SerSocketFd);
-	}
-}
-
-void Server::ReceiveNewData(int fd)
-{
-	char buff[1024]; //-> buffer for the received data
-	memset(buff, 0, sizeof(buff)); //-> clear the buffer
-
-	ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0); //-> receive the data
-
-	if(bytes <= 0){ //-> check if the client disconnected
-		std::cout << RED << "Client <" << fd << "> Disconnected" << WHI << std::endl;
-		ClearClients(fd); //-> clear the client
-		close(fd); //-> close the client socket
-	}
-
-	else{ //-> print the received data
-		buff[bytes] = '\0';
-		std::cout << YEL << "Client <" << fd << "> Data: " << WHI << buff;
-		//here you can add your code to process the received data: parse, check, authenticate, handle the command, etc...
-	}
-}
-void Server::ClearClients(int fd){ //-> clear the clients
-	for(size_t i = 0; i < fds.size(); i++){ //-> remove the client from the pollfd
-		if (fds[i].fd == fd)
-			{fds.erase(fds.begin() + i); break;}
-	}
-	for(size_t i = 0; i < clients.size(); i++){ //-> remove the client from the vector of clients
-		if (clients[i].GetFd() == fd)
-			{clients.erase(clients.begin() + i); break;}
-	}
-
-}
-
-void Server::AcceptNewClient()
-{
-	Client cli; //-> create a new client
-	struct sockaddr_in cliadd;
-	struct pollfd NewPoll;
-	socklen_t len = sizeof(cliadd);
-
-	int incofd = accept(SerSocketFd, (sockaddr *)&(cliadd), &len); //-> accept the new client
-	if (incofd == -1)
-		{std::cout << "accept() failed" << std::endl; return;}
-
-	if (fcntl(incofd, F_SETFL, O_NONBLOCK) == -1) //-> set the socket option (O_NONBLOCK) for non-blocking socket
-		{std::cout << "fcntl() failed" << std::endl; return;}
-
-	NewPoll.fd = incofd; //-> add the client socket to the pollfd
-	NewPoll.events = POLLIN; //-> set the event to POLLIN for reading data
-	NewPoll.revents = 0; //-> set the revents to 0
-
-	cli.SetFd(incofd); //-> set the client file descriptor
-	cli.setIpAdd(inet_ntoa((cliadd.sin_addr))); //-> convert the ip address to string and set it
-	clients.push_back(cli); //-> add the client to the vector of clients
-	fds.push_back(NewPoll); //-> add the client socket to the pollfd
-
-	std::cout << GRE << "Client <" << incofd << "> Connected" << WHI << std::endl;
-}
-
 void Server::SerSocket()
 {
 	int en = 1;
@@ -127,5 +51,81 @@ void Server::ServerInit()
 		}
 	}
 	CloseFds(); //-> close the file descriptors when the server stops
+}
+
+void Server::AcceptNewClient()
+{
+	Client cli; //-> create a new client
+	struct sockaddr_in cliadd;
+	struct pollfd NewPoll;
+	socklen_t len = sizeof(cliadd);
+
+	int incofd = accept(SerSocketFd, (sockaddr *)&(cliadd), &len); //-> accept the new client
+	if (incofd == -1)
+		{std::cout << "accept() failed" << std::endl; return;}
+
+	if (fcntl(incofd, F_SETFL, O_NONBLOCK) == -1) //-> set the socket option (O_NONBLOCK) for non-blocking socket
+		{std::cout << "fcntl() failed" << std::endl; return;}
+
+	NewPoll.fd = incofd; //-> add the client socket to the pollfd
+	NewPoll.events = POLLIN; //-> set the event to POLLIN for reading data
+	NewPoll.revents = 0; //-> set the revents to 0
+
+	cli.SetFd(incofd); //-> set the client file descriptor
+	cli.setIpAdd(inet_ntoa((cliadd.sin_addr))); //-> convert the ip address to string and set it
+	clients.push_back(cli); //-> add the client to the vector of clients
+	fds.push_back(NewPoll); //-> add the client socket to the pollfd
+
+	std::cout << GRE << "Client <" << incofd << "> Connected" << WHI << std::endl;
+}
+
+void Server::ReceiveNewData(int fd)
+{
+	char buff[1024]; //-> buffer for the received data
+	memset(buff, 0, sizeof(buff)); //-> clear the buffer
+
+	ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0); //-> receive the data
+
+	if(bytes <= 0){ //-> check if the client disconnected
+		std::cout << RED << "Client <" << fd << "> Disconnected" << WHI << std::endl;
+		ClearClients(fd); //-> clear the client
+		close(fd); //-> close the client socket
+	}
+
+	else{ //-> print the received data
+		buff[bytes] = '\0';
+		std::cout << YEL << "Client <" << fd << "> Data: " << WHI << buff;
+		//here you can add your code to process the received data: parse, check, authenticate, handle the command, etc...
+	}
+}
+void Server::ClearClients(int fd){ //-> clear the clients
+	for(size_t i = 0; i < fds.size(); i++){ //-> remove the client from the pollfd
+		if (fds[i].fd == fd)
+			{fds.erase(fds.begin() + i); break;}
+	}
+	for(size_t i = 0; i < clients.size(); i++){ //-> remove the client from the vector of clients
+		if (clients[i].GetFd() == fd)
+			{clients.erase(clients.begin() + i); break;}
+	}
+
+}
+
+bool Server::Signal = false; //-> initialize the static boolean
+void Server::SignalHandler(int signum)
+{
+	(void)signum;
+	std::cout << std::endl << "Signal Received!" << std::endl;
+	Server::Signal = true; //-> set the static boolean to true to stop the server
+}
+
+void	Server::CloseFds(){
+	for(size_t i = 0; i < clients.size(); i++){ //-> close all the clients
+		std::cout << RED << "Client <" << clients[i].GetFd() << "> Disconnected" << WHI << std::endl;
+		close(clients[i].GetFd());
+	}
+	if (SerSocketFd != -1){ //-> close the server socket
+		std::cout << RED << "Server <" << SerSocketFd << "> Disconnected" << WHI << std::endl;
+		close(SerSocketFd);
+	}
 }
 

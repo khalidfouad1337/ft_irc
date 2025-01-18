@@ -21,6 +21,7 @@
 #define YEL "\e[1;33m" //-> for yellow color
 
 
+class Client;
 
 class Server //-> class for server
 {
