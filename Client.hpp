@@ -4,17 +4,17 @@
 #include "server.hpp"
 #include <iostream>
 
-class Client //-> class for client
+class Client
 {
 private:
-	int Fd; //-> client file descriptor
+	int Fd;
 	std::string IPadd; //-> client ip address
 public:
-	Client(){}; //-> default constructor
-	int GetFd(){return Fd;} //-> getter for fd
+	Client(){};
+	int GetFd(){return Fd;}
 
-	void SetFd(int fd){Fd = fd;} //-> setter for fd
-	void setIpAdd(std::string ipadd){IPadd = ipadd;} //-> setter for ipadd
+	void SetFd(int fd){Fd = fd;}
+	void setIpAdd(std::string ipadd){IPadd = ipadd;}
 };
 
 #endif

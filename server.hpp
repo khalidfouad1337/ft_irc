@@ -15,18 +15,19 @@
 #include <poll.h> //-> for poll()
 #include <csignal> //-> for signal()
 
-#define RED "\e[1;31m" //-> for red color
-#define WHI "\e[0;37m" //-> for white color
-#define GRE "\e[1;32m" //-> for green color
-#define YEL "\e[1;33m" //-> for yellow color
+#define RED "\e[1;31m"
+#define WHI "\e[0;37m"
+#define GRE "\e[1;32m"
+#define YEL "\e[1;33m"
 
 
 class Client;
 
-class Server //-> class for server
+class Server
 {
 private:
-	int Port; //-> server port
+	int Port;
+	std::string password;
 	int SerSocketFd; //-> server socket file descriptor
 	static bool Signal; //-> static boolean for signal
 	std::vector<Client> clients; //-> vector of clients
@@ -34,7 +35,8 @@ private:
 public:
 	Server(){SerSocketFd = -1;} //-> default constructor
 
-	void ServerInit(); //-> server initialization
+	// void ServerInit(); //-> server initialization
+	void ServerInit(int port, std::string password);
 	void SerSocket(); //-> server socket creation
 	void AcceptNewClient(); //-> accept new client
 	void ReceiveNewData(int fd); //-> receive new data from a registered client

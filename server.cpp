@@ -28,9 +28,11 @@ void Server::SerSocket()
 	fds.push_back(NewPoll); //-> add the server socket to the pollfd
 }
 
-void Server::ServerInit()
+// void Server::ServerInit()
+void Server::ServerInit(int port, std::string password)
 {
-	this->Port = 4444;
+	this->Port = port;
+	this->password = password;
 	SerSocket(); //-> create the server socket
 
 	std::cout << GRE << "Server <" << SerSocketFd << "> Connected" << WHI << std::endl;
