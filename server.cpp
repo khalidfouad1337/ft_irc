@@ -17,6 +17,7 @@ void Server::signalHandler(int signalNumber)
 	Server::signalFlag = true;
 }
 
+
 void	Server::closeAllConnections()
 {
 	for(size_t i = 0; i < clientList.size(); i++)
