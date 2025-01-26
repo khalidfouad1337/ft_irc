@@ -8,13 +8,13 @@ class Client
 {
 private:
 	int Fd;
-	std::string IPadd; //-> client ip address
+	std::string IPaddress;
 public:
 	Client(){};
-	int GetFd(){return Fd;}
+	int getFileDescriptor(){return Fd;}
 
 	void SetFd(int fd){Fd = fd;}
-	void setIpAdd(std::string ipadd){IPadd = ipadd;}
+	void setIpAdd(std::string ipaddress){IPaddress = ipaddress;}
 };
 
 #endif

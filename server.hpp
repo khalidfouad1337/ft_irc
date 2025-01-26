@@ -5,20 +5,20 @@
 
 
 #include <iostream>
-#include <vector> //-> for vector
-#include <sys/socket.h> //-> for socket()
-#include <sys/types.h> //-> for socket()
-#include <netinet/in.h> //-> for sockaddr_in
-#include <fcntl.h> //-> for fcntl()
-#include <unistd.h> //-> for close()
+#include <vector>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <arpa/inet.h> //-> for inet_ntoa()
-#include <poll.h> //-> for poll()
-#include <csignal> //-> for signal()
+#include <poll.h>
+#include <csignal>
 
-#define RED "\e[1;31m"
-#define WHI "\e[0;37m"
-#define GRE "\e[1;32m"
-#define YEL "\e[1;33m"
+#define COLOR_RED "\e[1;31m"
+#define COLOR_WHITE "\e[0;37m"
+#define COLOR_GREEN "\e[1;32m"
+#define COLOR_YELLOW "\e[1;33m"
 
 
 class Client;
@@ -26,25 +26,24 @@ class Client;
 class Server
 {
 private:
-	int Port;
+	int serverPort;
 	std::string password;
-	int SerSocketFd; //-> server socket file descriptor
-	static bool Signal; //-> static boolean for signal
-	std::vector<Client> clients; //-> vector of clients
-	std::vector<struct pollfd> fds; //-> vector of pollfd
+	int ServerSocket; //-> server socket file descriptor
+	static bool signalFlag;
+	std::vector<Client> clientList;
+	std::vector<struct pollfd> pollDescriptors;
 public:
-	Server(){SerSocketFd = -1;} //-> default constructor
+	Server();
 
-	// void ServerInit(); //-> server initialization
-	void ServerInit(int port, std::string password);
-	void SerSocket(); //-> server socket creation
-	void AcceptNewClient(); //-> accept new client
-	void ReceiveNewData(int fd); //-> receive new data from a registered client
+	void initializeServer(int serverPort, std::string password);
+	void CreateSocket();
+	void AcceptClient();
+	void handleIncomingData(int fd);
 
-	static void SignalHandler(int signum); //-> signal handler
+	static void signalHandler(int signalNumbre);
 	
-	void CloseFds(); //-> close file descriptors
-	void ClearClients(int fd); //-> clear clients
+	void closeAllConnections();
+	void removeClient(int fd);
 };
 
 #endif

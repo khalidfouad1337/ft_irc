@@ -8,17 +8,17 @@ int main(int ac,char **argv)
 		std::cerr << "Usage: " << argv[0] << " <port> <password>" << std::endl;
         return (1);
 	}
-	Server ser;
-	std::cout << "---- SERVER ----" << std::endl;
+	Server serverInstance;
+	std::cout << "---- SERVER APPLICATION ----" << std::endl;
 	try{
-		signal(SIGINT, Server::SignalHandler); //-> catch the signal (ctrl + c)
-		signal(SIGQUIT, Server::SignalHandler); //-> catch the signal (ctrl + \)
+		signal(SIGINT, Server::signalHandler); //-> catch the signal (ctrl + c)
+		signal(SIGQUIT, Server::signalHandler); //-> catch the signal (ctrl + \)
 		int port = atoi(argv[1]);
-		ser.ServerInit(port, argv[2]); //-> initialize the server
+		serverInstance.initializeServer(port, argv[2]); //-> initialize the server
 	}
 	catch(const std::exception& e){
-		ser.CloseFds(); //-> close the file descriptors
+		serverInstance.closeAllConnections(); //-> close the file descriptors
 		std::cerr << e.what() << std::endl;
 	}
-	std::cout << "The Server Closed!" << std::endl;
+	std::cout << "Server shutdown completed." << std::endl;
 }
