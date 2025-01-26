@@ -6,8 +6,9 @@ Server::Server()
 ServerSocket = -1;
 password = "";
 serverPort = 4444;
-signalFlag = false;
 }
+
+bool Server::signalFlag = false;
 
 void Server::signalHandler(int signalNumber)
 {
